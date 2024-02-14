@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/joho/godotenv"
 )
@@ -38,7 +39,18 @@ func main() {
 
 	v1Router := chi.NewRouter()
 
+	// Goes first
+	v1Router.Use(middleware.Logger)
+
 	router.Mount("/v1", v1Router)
+
+	// 404 & 405 handling
+	router.NotFound(func(w http.ResponseWriter, r *http.Request){
+		respondWithError(w, 404, "route does not exist")
+	})
+	router.MethodNotAllowed(func(w http.ResponseWriter, r *http.Request){
+		respondWithError(w, 405, "method is not valid")
+	})
 
 	srv := &http.Server{
 		Handler: router,
