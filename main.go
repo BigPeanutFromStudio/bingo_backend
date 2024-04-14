@@ -42,6 +42,7 @@ func main() {
 	// Goes first
 	v1Router.Use(middleware.Logger)
 
+	//Handlers
 	v1Router.Post("/generate", generateBoard)
 
 	router.Mount("/v1", v1Router)

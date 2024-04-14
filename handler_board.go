@@ -7,11 +7,14 @@ import (
 	"net/http"
 )
 
-
+type event struct{
+	Name string
+}
 
 func generateBoard(w http.ResponseWriter, r *http.Request){
 	type parameters struct{
-		Events []string `json:"events"`
+		BoardSize int `json:size`
+		Events []event `json:"events"`
 	}
 
 	decoder := json.NewDecoder(r.Body)
@@ -26,6 +29,7 @@ func generateBoard(w http.ResponseWriter, r *http.Request){
 
 	events := params.Events
 	rand.Shuffle(len(events), func (i, j int) {events[i], events[j] = events[j], events[i]})
+	events[:params.BoardSize - 1] //fix whatever that is lol
 
 	respondWithJSON(w, 201, parameters{Events: events})
 }
