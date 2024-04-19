@@ -13,8 +13,6 @@ import (
 
 type apiConfig struct{
 	//DB *database.Queries
-	//but first sqlc generate and goose up to migrate
-	//but first first create schema and queries
 }
 
 func main() {
