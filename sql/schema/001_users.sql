@@ -1,4 +1,4 @@
--- +goose UP
+-- +goose Up
 
 CREATE TABLE users (
   id UUID PRIMARY KEY,
@@ -7,6 +7,6 @@ CREATE TABLE users (
   updated_at TIMESTAMP NOT NULL
 );
 
--- +goose DOWN
+-- +goose Down
 
 DROP TABLE users;   
