@@ -60,7 +60,9 @@ func main() {
 	v1Router.Use(middleware.Logger)
 
 	//Handlers
-	v1Router.Post("/generate", generateBoard)
+	v1Router.Post("/boards", apiCfg.middlewareAuth(apiCfg.handlerCreateBoard))
+	v1Router.Get("/boards", apiCfg.middlewareAuth(apiCfg.handlerGetBoards))
+
 	v1Router.Post("/users", apiCfg.handlerCreateUser)
 	v1Router.Get("/users", apiCfg.middlewareAuth(apiCfg.handlerGetUser))
 
