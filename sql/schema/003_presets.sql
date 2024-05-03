@@ -1,6 +1,6 @@
 -- +goose Up
 
-CREATE TABLE boards (
+CREATE TABLE presets (
   id UUID PRIMARY KEY,
   name TEXT NOT NULL,
   events JSONB NOT NULL,
@@ -11,4 +11,4 @@ CREATE TABLE boards (
 
 -- +goose Down
 
-DROP TABLE boards;   
+DROP TABLE presets;   

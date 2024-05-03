@@ -13,13 +13,13 @@ import (
 	"github.com/google/uuid"
 )
 
-const createBoard = `-- name: CreateBoard :one
-INSERT INTO boards (id, name, events, created_at, updated_at, owner_id)
+const createPreset = `-- name: CreatePreset :one
+INSERT INTO presets (id, name, events, created_at, updated_at, owner_id)
 VALUES ($1, $2, $3, $4, $5, $6)
 RETURNING id, name, events, created_at, updated_at, owner_id
 `
 
-type CreateBoardParams struct {
+type CreatePresetParams struct {
 	ID        uuid.UUID
 	Name      string
 	Events    json.RawMessage
@@ -28,8 +28,8 @@ type CreateBoardParams struct {
 	OwnerID   uuid.UUID
 }
 
-func (q *Queries) CreateBoard(ctx context.Context, arg CreateBoardParams) (Board, error) {
-	row := q.db.QueryRowContext(ctx, createBoard,
+func (q *Queries) CreatePreset(ctx context.Context, arg CreatePresetParams) (Preset, error) {
+	row := q.db.QueryRowContext(ctx, createPreset,
 		arg.ID,
 		arg.Name,
 		arg.Events,
@@ -37,7 +37,7 @@ func (q *Queries) CreateBoard(ctx context.Context, arg CreateBoardParams) (Board
 		arg.UpdatedAt,
 		arg.OwnerID,
 	)
-	var i Board
+	var i Preset
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
@@ -49,19 +49,19 @@ func (q *Queries) CreateBoard(ctx context.Context, arg CreateBoardParams) (Board
 	return i, err
 }
 
-const getUserBoards = `-- name: GetUserBoards :many
-SELECT id, name, events, created_at, updated_at, owner_id FROM boards WHERE owner_id = $1
+const getUserPresets = `-- name: GetUserPresets :many
+SELECT id, name, events, created_at, updated_at, owner_id FROM presets WHERE owner_id = $1
 `
 
-func (q *Queries) GetUserBoards(ctx context.Context, ownerID uuid.UUID) ([]Board, error) {
-	rows, err := q.db.QueryContext(ctx, getUserBoards, ownerID)
+func (q *Queries) GetUserPresets(ctx context.Context, ownerID uuid.UUID) ([]Preset, error) {
+	rows, err := q.db.QueryContext(ctx, getUserPresets, ownerID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Board
+	var items []Preset
 	for rows.Next() {
-		var i Board
+		var i Preset
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,

@@ -14,7 +14,7 @@ type event struct{
 	Name string
 }
 
-func (apiCfg *apiConfig)handlerCreateBoard(w http.ResponseWriter, r *http.Request, user database.User){
+func (apiCfg *apiConfig)handlerCreatePreset(w http.ResponseWriter, r *http.Request, user database.User){
 	type parameters struct{
 		Name string `json:"name"`
 		Events []event `json:"events"`
@@ -37,7 +37,7 @@ func (apiCfg *apiConfig)handlerCreateBoard(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	board, err := apiCfg.DB.CreateBoard(r.Context(), database.CreateBoardParams{
+	preset, err := apiCfg.DB.CreatePreset(r.Context(), database.CreatePresetParams{
 		ID: uuid.New(),
 		Name: params.Name,
 		Events: Events,
@@ -47,20 +47,20 @@ func (apiCfg *apiConfig)handlerCreateBoard(w http.ResponseWriter, r *http.Reques
 	})
 
 	if err != nil{
-		respondWithError(w, 400, fmt.Sprintf("Error creating board: %v", err))
+		respondWithError(w, 400, fmt.Sprintf("Error creating preset: %v", err))
 		return
 	}
 
-	respondWithJSON(w, 201, board)
+	respondWithJSON(w, 201, preset)
 }
 
-func (apiCfg *apiConfig)handlerGetBoards(w http.ResponseWriter, r *http.Request, user database.User){
-	boards, err := apiCfg.DB.GetUserBoards(r.Context(), user.ID)
+func (apiCfg *apiConfig)handlerGetPresets(w http.ResponseWriter, r *http.Request, user database.User){
+	presets, err := apiCfg.DB.GetUserPresets(r.Context(), user.ID)
 
 	if err != nil{
-		respondWithError(w, 400, fmt.Sprintf("Error getting boards: %v", err))
+		respondWithError(w, 400, fmt.Sprintf("Error getting presets: %v", err))
 		return
 	}
 
-	respondWithJSON(w, 200, boards)
+	respondWithJSON(w, 200, presets)
 }

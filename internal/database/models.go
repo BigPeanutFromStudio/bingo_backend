@@ -11,7 +11,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type Board struct {
+type Preset struct {
 	ID        uuid.UUID
 	Name      string
 	Events    json.RawMessage
