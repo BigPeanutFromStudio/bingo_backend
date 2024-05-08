@@ -19,6 +19,9 @@ type apiConfig struct{
 	DB *database.Queries
 }
 
+//IMPORTANT: FIX IRREGULAR NAMING CONVENTION IN DATABASE
+
+
 func main() {
 
 	godotenv.Load()
@@ -65,6 +68,14 @@ func main() {
 
 	v1Router.Post("/users", apiCfg.handlerCreateUser)
 	v1Router.Get("/users", apiCfg.middlewareAuth(apiCfg.handlerGetUser))
+
+	v1Router.Post("/games", apiCfg.middlewareAuth(apiCfg.handlerCreateGame))
+	
+	//Add id to path in join
+	v1Router.Post("/games/join", apiCfg.middlewareAuth(apiCfg.handlerCreateGamesUsers))
+	v1Router.Get("/games", apiCfg.middlewareAuth(apiCfg.handlerGetGamesUsers))
+	v1Router.Delete("/games/{gamesuesersID}", apiCfg.middlewareAuth(apiCfg.handlerDeleteGamesUsers))
+
 
 	router.Mount("/v1", v1Router)
 

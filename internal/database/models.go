@@ -11,6 +11,24 @@ import (
 	"github.com/google/uuid"
 )
 
+type Game struct {
+	ID        uuid.UUID
+	Name      string
+	EndTime   time.Time
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	Preset    uuid.UUID
+	AdminID   uuid.UUID
+}
+
+type GamesUser struct {
+	ID        uuid.UUID
+	GameID    uuid.UUID
+	UserID    uuid.UUID
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
 type Preset struct {
 	ID        uuid.UUID
 	Name      string
