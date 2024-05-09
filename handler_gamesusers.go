@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -14,22 +13,17 @@ import (
 
 func (apiCfg *apiConfig)handlerCreateGamesUsers(w http.ResponseWriter, r *http.Request, user database.User) {
 	
-	type parameters struct{
-		GameID uuid.UUID `json:"game_id"`
-	}
 
-	decoder := json.NewDecoder(r.Body)
+	gamesUsersIDstr := chi.URLParam(r, "gamesuesersID")
 
-	params := parameters{}
-
-	err := decoder.Decode(&params)
+	gamesUsersID, err := uuid.Parse(gamesUsersIDstr)
 
 	if err != nil{
-		respondWithError(w, 400, fmt.Sprintf("Error parsing JSON: %v", err))
+		respondWithError(w, 400, fmt.Sprintf("Error parsing UUID: %v", err))
 		return
 	}
 
-	_, err = apiCfg.DB.GetGame(r.Context(), params.GameID)
+	_, err = apiCfg.DB.GetGame(r.Context(), gamesUsersID)
 
 	if err != nil{
 		respondWithError(w, 400, fmt.Sprintf("Error getting game: %v", err))
@@ -39,7 +33,7 @@ func (apiCfg *apiConfig)handlerCreateGamesUsers(w http.ResponseWriter, r *http.R
 	gameuser, err := apiCfg.DB.CreateGameUser(r.Context(), database.CreateGameUserParams{
 		ID: uuid.New(),
 		UserID: user.ID,
-		GameID: params.GameID,
+		GameID: gamesUsersID,
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
 	})
