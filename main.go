@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/BigPeanutFromStudio/bingo/internal/auth"
 	"github.com/BigPeanutFromStudio/bingo/internal/database"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -20,10 +21,12 @@ type apiConfig struct{
 }
 
 //IMPORTANT: FIX IRREGULAR NAMING CONVENTION IN DATABASE
+//REDO THE USER CREATION AND AUTHENTICATION SYSTEM (database already adjusted, need to drop it tho)
 
 
 func main() {
 
+	auth.NewAuth()
 	godotenv.Load()
 
 	portString := os.Getenv("PORT")
@@ -74,6 +77,10 @@ func main() {
 	v1Router.Post("/games/join/{gamesuesersID}", apiCfg.middlewareAuth(apiCfg.handlerCreateGamesUsers))
 	v1Router.Get("/games", apiCfg.middlewareAuth(apiCfg.handlerGetGamesUsers))
 	v1Router.Delete("/games/{gamesuesersID}", apiCfg.middlewareAuth(apiCfg.handlerDeleteGamesUsers))
+
+	v1Router.Get("/auth/{provider}/callback", getAuthCallbackFunction)
+	v1Router.Get("/logout", logoutHandler)
+	v1Router.Get("/auth/{provider}", beginAuthHandler)
 
 
 	router.Mount("/v1", v1Router)

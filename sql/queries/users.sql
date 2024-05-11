@@ -1,7 +1,7 @@
 -- name: CreateUser :one
-INSERT INTO users (id, nickname, created_at, updated_at)
-VALUES ($1, $2, $3, $4)
+INSERT INTO users (id, nickname, email ,refresh_token, picture_url, created_at, updated_at)
+VALUES ($1, $2, $3, $4, $5, $6, $7)
 RETURNING *;
 
--- name: GetUserByToken :one
-SELECT * FROM users WHERE token = $1;
+-- name: GetUserByID :one
+SELECT * FROM users WHERE id = $1;
