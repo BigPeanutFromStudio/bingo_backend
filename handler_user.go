@@ -7,8 +7,28 @@ import (
 	"time"
 
 	"github.com/BigPeanutFromStudio/bingo/internal/database"
-	"github.com/google/uuid"
+	"github.com/markbates/goth"
 )
+
+func (apiCfg *apiConfig)handlerCreateGoogleUser(w http.ResponseWriter, r *http.Request, userData goth.User){
+
+	user, err := apiCfg.DB.CreateUser(r.Context(), database.CreateUserParams{
+		ID: userData.UserID,
+		Nickname: "Temporarily not working LMAO",
+		Email: userData.Email,
+		PictureUrl: userData.AvatarURL,
+		RefreshToken: userData.RefreshToken,
+		CreatedAt: time.Now().UTC(),
+		UpdatedAt: time.Now().UTC(),
+	})
+
+	if err != nil {
+		respondWithError(w, 400, fmt.Sprintf("Error creating user: %v", err))
+		return
+	}
+
+	respondWithJSON(w, 201, user)
+} 
 
 func (apiCfg *apiConfig)handlerCreateUser(w http.ResponseWriter, r *http.Request) {
 
@@ -25,7 +45,7 @@ func (apiCfg *apiConfig)handlerCreateUser(w http.ResponseWriter, r *http.Request
 	}
 
 	user, err := apiCfg.DB.CreateUser(r.Context(), database.CreateUserParams{
-		ID: uuid.New(),
+		ID: "TEMPORARY VALUE",
 		Nickname: params.Nickname,
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),

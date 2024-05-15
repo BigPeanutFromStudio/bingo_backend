@@ -78,7 +78,7 @@ func main() {
 	v1Router.Get("/games", apiCfg.middlewareAuth(apiCfg.handlerGetGamesUsers))
 	v1Router.Delete("/games/{gamesuesersID}", apiCfg.middlewareAuth(apiCfg.handlerDeleteGamesUsers))
 
-	v1Router.Get("/auth/{provider}/callback", getAuthCallbackFunction)
+	v1Router.Get("/auth/{provider}/callback", apiCfg.getAuthCallbackFunction)
 	v1Router.Get("/logout", logoutHandler)
 	v1Router.Get("/auth/{provider}", beginAuthHandler)
 

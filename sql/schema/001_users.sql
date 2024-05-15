@@ -1,7 +1,7 @@
 -- +goose Up
 
 CREATE TABLE users (
-  id TEXT PRIMARY KEY,
+  id VARCHAR(21) PRIMARY KEY,
   nickname TEXT NOT NULL,
   email TEXT NOT NULL,
   refresh_token TEXT NOT NULL,

@@ -25,7 +25,7 @@ type CreatePresetParams struct {
 	Events    json.RawMessage
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	OwnerID   uuid.UUID
+	OwnerID   string
 }
 
 func (q *Queries) CreatePreset(ctx context.Context, arg CreatePresetParams) (Preset, error) {
@@ -53,7 +53,7 @@ const getUserPresets = `-- name: GetUserPresets :many
 SELECT id, name, events, created_at, updated_at, owner_id FROM presets WHERE owner_id = $1
 `
 
-func (q *Queries) GetUserPresets(ctx context.Context, ownerID uuid.UUID) ([]Preset, error) {
+func (q *Queries) GetUserPresets(ctx context.Context, ownerID string) ([]Preset, error) {
 	rows, err := q.db.QueryContext(ctx, getUserPresets, ownerID)
 	if err != nil {
 		return nil, err

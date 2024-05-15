@@ -20,7 +20,7 @@ RETURNING id, game_id, user_id, created_at, updated_at
 
 type CreateGameUserParams struct {
 	ID        uuid.UUID
-	UserID    uuid.UUID
+	UserID    string
 	GameID    uuid.UUID
 	CreatedAt time.Time
 	UpdatedAt time.Time
@@ -51,7 +51,7 @@ DELETE FROM games_users WHERE id = $1 AND user_id = $2
 
 type DeleteGameUsersParams struct {
 	ID     uuid.UUID
-	UserID uuid.UUID
+	UserID string
 }
 
 func (q *Queries) DeleteGameUsers(ctx context.Context, arg DeleteGameUsersParams) error {
@@ -63,7 +63,7 @@ const getGameUsers = `-- name: GetGameUsers :many
 SELECT id, game_id, user_id, created_at, updated_at FROM games_users WHERE user_id = $1
 `
 
-func (q *Queries) GetGameUsers(ctx context.Context, userID uuid.UUID) ([]GamesUser, error) {
+func (q *Queries) GetGameUsers(ctx context.Context, userID string) ([]GamesUser, error) {
 	rows, err := q.db.QueryContext(ctx, getGameUsers, userID)
 	if err != nil {
 		return nil, err

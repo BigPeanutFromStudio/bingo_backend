@@ -25,7 +25,7 @@ type CreateGameParams struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	Preset    uuid.UUID
-	AdminID   uuid.UUID
+	AdminID   string
 }
 
 func (q *Queries) CreateGame(ctx context.Context, arg CreateGameParams) (Game, error) {

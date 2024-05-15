@@ -8,27 +8,31 @@ package database
 import (
 	"context"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users (id, nickname, created_at, updated_at)
-VALUES ($1, $2, $3, $4)
-RETURNING id, nickname, created_at, updated_at, token
+INSERT INTO users (id, nickname, email ,refresh_token, picture_url, created_at, updated_at)
+VALUES ($1, $2, $3, $4, $5, $6, $7)
+RETURNING id, nickname, email, refresh_token, picture_url, created_at, updated_at
 `
 
 type CreateUserParams struct {
-	ID        uuid.UUID
-	Nickname  string
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID           string
+	Nickname     string
+	Email        string
+	RefreshToken string
+	PictureUrl   string
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
 	row := q.db.QueryRowContext(ctx, createUser,
 		arg.ID,
 		arg.Nickname,
+		arg.Email,
+		arg.RefreshToken,
+		arg.PictureUrl,
 		arg.CreatedAt,
 		arg.UpdatedAt,
 	)
@@ -36,26 +40,30 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 	err := row.Scan(
 		&i.ID,
 		&i.Nickname,
+		&i.Email,
+		&i.RefreshToken,
+		&i.PictureUrl,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.Token,
 	)
 	return i, err
 }
 
-const getUserByToken = `-- name: GetUserByToken :one
-SELECT id, nickname, created_at, updated_at, token FROM users WHERE token = $1
+const getUserByID = `-- name: GetUserByID :one
+SELECT id, nickname, email, refresh_token, picture_url, created_at, updated_at FROM users WHERE id = $1
 `
 
-func (q *Queries) GetUserByToken(ctx context.Context, token string) (User, error) {
-	row := q.db.QueryRowContext(ctx, getUserByToken, token)
+func (q *Queries) GetUserByID(ctx context.Context, id string) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserByID, id)
 	var i User
 	err := row.Scan(
 		&i.ID,
 		&i.Nickname,
+		&i.Email,
+		&i.RefreshToken,
+		&i.PictureUrl,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.Token,
 	)
 	return i, err
 }
