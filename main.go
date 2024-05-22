@@ -21,8 +21,7 @@ type apiConfig struct{
 }
 
 //IMPORTANT: FIX IRREGULAR NAMING CONVENTION IN DATABASE
-//REDO THE USER CREATION AND AUTHENTICATION SYSTEM (database already adjusted, need to drop it tho)
-
+//BOARDS TABLE, EVENTS IN JSON, ONE TO MANY
 
 func main() {
 
@@ -66,11 +65,12 @@ func main() {
 	v1Router.Use(middleware.Logger)
 
 	//Handlers
-	v1Router.Post("/boards", apiCfg.middlewareAuth(apiCfg.handlerCreatePreset))
-	v1Router.Get("/boards", apiCfg.middlewareAuth(apiCfg.handlerGetPresets))
+	v1Router.Post("/presets", apiCfg.middlewareAuth(apiCfg.handlerCreatePreset))
+	v1Router.Get("/presets", apiCfg.middlewareAuth(apiCfg.handlerGetPresets))
 
-	v1Router.Post("/users", apiCfg.handlerCreateUser)
+	//v1Router.Post("/users", apiCfg.handlerCreateUser)
 	v1Router.Get("/users", apiCfg.middlewareAuth(apiCfg.handlerGetUser))
+	v1Router.Put("/users", apiCfg.middlewareAuth(apiCfg.handlerSetGoogleUserNickname))
 
 	v1Router.Post("/games", apiCfg.middlewareAuth(apiCfg.handlerCreateGame))
 	

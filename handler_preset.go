@@ -12,6 +12,7 @@ import (
 
 type event struct{
 	Name string
+	//ID and Description
 }
 
 func (apiCfg *apiConfig)handlerCreatePreset(w http.ResponseWriter, r *http.Request, user database.User){

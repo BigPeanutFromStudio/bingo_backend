@@ -44,13 +44,14 @@ func NewAuth(){
 
 }
 
-func GetToken(headers http.Header) (string, error) {
-	token := headers.Get("Authorization")
-	if token == "" {
+
+func GetID(headers http.Header) (string, error) {
+	id := headers.Get("Authorization")
+	if id == "" {
 		return "", errors.New("no authentication token provided") 
 	}
 	
-	vals := strings.Split(token, " ")
+	vals := strings.Split(id, " ")
 	if len(vals) != 2 {
 		return "", errors.New("invalid token format")
 	}

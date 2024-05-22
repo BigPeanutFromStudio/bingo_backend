@@ -2,9 +2,7 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 
 	"github.com/BigPeanutFromStudio/bingo/internal/auth"
@@ -21,43 +19,17 @@ type authedHandler func(http.ResponseWriter, *http.Request, database.User)
 
 func (apiCfg *apiConfig) middlewareAuth(handler authedHandler) http.HandlerFunc{
 	return func(w http.ResponseWriter, r *http.Request){
-		token, err := auth.GetToken(r.Header)
+		id, err := auth.GetID(r.Header)
 
 		if err != nil {
 			respondWithError(w, 400, fmt.Sprintf("Auth error: %v", err))
 			return
 		}
 
-		url := "https://www.googleapis.com/oauth2/v3/userinfo?access_token=" + token 
+		user, err := apiCfg.DB.GetUserByID(r.Context(), id)
 
-		resp, err := http.Get(url)
-
-		if err != nil{
-			respondWithError(w, 400, fmt.Sprintf("Couldn't get user: %v", err))
-			return
-		}
-
-		defer resp.Body.Close()
-		body, err := io.ReadAll(resp.Body)
-
-		if err != nil{
-			respondWithError(w, 400, fmt.Sprintf("Error reading response body: %v", err))
-			return
-		}
-
-		var userData map[string]interface{}
-		err = json.Unmarshal(body, &userData)
-
-		if err != nil{
-			respondWithError(w, 400, fmt.Sprintf("Error unmarshaling response body: %v", err))
-			return
-		}
-
-		user, err := apiCfg.DB.GetUserByID(r.Context(), userData["sub"].(string))
-
-
+		
 		if err != nil {
-			//apiCfg.handlerCreateGoogleUser(w, r, userData)
 			respondWithError(w, 400, fmt.Sprintf("Error getting user: %v", err))
 			return
 		}
@@ -81,11 +53,14 @@ func (apiCfg *apiConfig)getAuthCallbackFunction(w http.ResponseWriter, r *http.R
 
 	// fmt.Printf("AccessToken: %s\nAccessTokenSecret: %s\nRefreshToken: %s\nExpiresAt: %s\nRawData: %s\n",
 	// 	user.AccessToken, user.AccessTokenSecret, user.RefreshToken, user.ExpiresAt, user.RawData)
-	apiCfg.handlerCreateGoogleUser(w, r, user)
+	_, err = apiCfg.DB.GetUserByID(r.Context(), user.UserID)
 
-	//@BigPeanutFromStudio REMEMBER TO PASS THE ACCESS TOKEN TO THE FRONT-END
+	if err != nil{
+		apiCfg.handlerCreateGoogleUser(w, r, user)
+		return
+	}
 
-	http.Redirect(w, r, "http://localhost:5173/", 301)
+	//HERE SEND THE TOKEN TO FRONT END; SEE HANDLER USER FOR DETAILS
 
 }
 
