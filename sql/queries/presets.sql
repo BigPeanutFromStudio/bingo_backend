@@ -5,3 +5,6 @@ RETURNING *;
 
 -- name: GetUserPresets :many
 SELECT * FROM presets WHERE owner_id = $1;
+
+-- name: GetUserPresetByID :one
+SELECT * FROM presets WHERE id = $1;

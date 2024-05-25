@@ -1,7 +1,12 @@
 package auth
 
 import (
+	"crypto/aes"
+	"crypto/cipher"
+	"crypto/rand"
+	"encoding/base64"
 	"errors"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -15,15 +20,18 @@ import (
 )
 
 const (
-	key = "bda413dfbbdf78d06947bf6a9e60e83c40cb975f74ff47159c63f14376b97611"
 	MaxAge = 86400 * 30 // 30 days
 	isProd = false
 )
 
 func NewAuth(){
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
+
+	godotenv.Load()
+
+	key := os.Getenv("SECRET")
+
+	if key == ""{
+		log.Fatal("SECRET variable not found in environment")
 	}
 
 	googleClientID := os.Getenv("GOOGLE_CLIENT_ID")
@@ -60,8 +68,60 @@ func GetID(headers http.Header) (string, error) {
 		return "", errors.New("invalid token type")
 	}
 
+	// godotenv.Load()
+
+	// key := os.Getenv("SECRET")
+
+	// if key == ""{
+	// 	log.Fatal("SECRET variable not found in environment")
+	// }
+
+	// userID, err := Decrypt([]byte(key), []byte(vals[1]))
+
+
+	// if err != nil{
+	// 	return "", errors.New("decryption error")
+	// }
+
+	// userIDstring := string(userID)
+
 	return vals[1], nil
 
 
 
+}
+
+func Encrypt(key, text []byte) ([]byte, error) {
+    block, err := aes.NewCipher(key)
+    if err != nil {
+        return nil, err
+    }
+    b := base64.StdEncoding.EncodeToString(text)
+    ciphertext := make([]byte, aes.BlockSize+len(b))
+    iv := ciphertext[:aes.BlockSize]
+    if _, err := io.ReadFull(rand.Reader, iv); err != nil {
+        return nil, err
+    }
+    cfb := cipher.NewCFBEncrypter(block, iv)
+    cfb.XORKeyStream(ciphertext[aes.BlockSize:], []byte(b))
+    return ciphertext, nil
+}
+
+func Decrypt(key, text []byte) ([]byte, error) {
+    block, err := aes.NewCipher(key)
+    if err != nil {
+        return nil, err
+    }
+    if len(text) < aes.BlockSize {
+        return nil, errors.New("ciphertext too short")
+    }
+    iv := text[:aes.BlockSize]
+    text = text[aes.BlockSize:]
+    cfb := cipher.NewCFBDecrypter(block, iv)
+    cfb.XORKeyStream(text, text)
+    data, err := base64.StdEncoding.DecodeString(string(text))
+    if err != nil {
+        return nil, err
+    }
+    return data, nil
 }

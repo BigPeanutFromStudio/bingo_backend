@@ -1,6 +1,8 @@
 package main
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -11,6 +13,14 @@ import (
 )
 
 //DO NOT RETURN SENSITIVE DATA LMAO
+
+func randomHex(n int) (string, error) {
+  bytes := make([]byte, n)
+  if _, err := rand.Read(bytes); err != nil {
+    return "", err
+  }
+  return hex.EncodeToString(bytes), nil
+}
 
 func (apiCfg *apiConfig)handlerSetGoogleUserNickname(w http.ResponseWriter, r *http.Request, user database.User){
 
@@ -27,9 +37,16 @@ func (apiCfg *apiConfig)handlerSetGoogleUserNickname(w http.ResponseWriter, r *h
 		return
 	}
 
+	nickID, err := randomHex(5)
+
+	if err != nil{
+		respondWithError(w, 400, fmt.Sprintf("Error generating id: %v", err))
+		return
+	}
+
 	updatedUser, err := apiCfg.DB.UpdateUser(r.Context(), database.UpdateUserParams{
 		ID: user.ID,
-		Nickname: params.Nickname,
+		Nickname: params.Nickname + "#" + nickID,
 	})
 
 	if err != nil{
@@ -45,13 +62,11 @@ func (apiCfg *apiConfig)handlerCreateGoogleUser(w http.ResponseWriter, r *http.R
 
 	// GET USER MAYBE?
 
-	//@BigPeanutFromStudio idk if I should store RefreshToken now
 	user, err := apiCfg.DB.CreateUser(r.Context(), database.CreateUserParams{
 		ID: userData.UserID,
 		Nickname: "Temporarily not working LMAO",
 		Email: userData.Email,
 		PictureUrl: userData.AvatarURL,
-		RefreshToken: userData.RefreshToken,
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
 	})
@@ -62,19 +77,38 @@ func (apiCfg *apiConfig)handlerCreateGoogleUser(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	type userToReturn struct{
-		Nickname string `json:"nickname"`
-		Email string `json:"email"`
-		PictureUrl string `json:"picture_url"`
-	}
+	// type userToReturn struct{
+	// 	Nickname string `json:"nickname"`
+	// 	Email string `json:"email"`
+	// 	PictureUrl string `json:"picture_url"`
+	// }
 
-	token := "Token " + user.ID // JWT it
+	// godotenv.Load()
 
-	r.Header.Add("Authorization", token)
+	// key := os.Getenv("SECRET")
 
-	userInfo, _ := json.Marshal(userToReturn{Nickname: user.Nickname, Email: user.Email, PictureUrl: user.PictureUrl})
+	// if key == ""{
+	// 	log.Fatal("SECRET variable not found in environment")
+	// }
 
-	respondWithJSON(w, 201, userInfo)
+	// cipherID, err := auth.Encrypt([]byte(key), []byte(user.ID))
+
+	// if err != nil{
+	// 	respondWithError(w, 400, fmt.Sprintf("Error encrypting ID: %v", err))
+	// 	return
+	// }
+
+	token := "Token " + user.ID
+
+	w.Header().Add("Authorization", token)
+
+	fmt.Printf("%v", token)
+
+	user.ID = "Lol you tried"
+
+	//userInfo, _ := json.Marshal(userToReturn{Nickname: user.Nickname, Email: user.Email, PictureUrl: user.PictureUrl})
+
+	respondWithJSON(w, 201, user)
 } 
 
 // func (apiCfg *apiConfig)handlerCreateUser(w http.ResponseWriter, r *http.Request) {

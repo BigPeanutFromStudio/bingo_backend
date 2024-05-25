@@ -39,11 +39,10 @@ type Preset struct {
 }
 
 type User struct {
-	ID           string
-	Nickname     string
-	Email        string
-	RefreshToken string
-	PictureUrl   string
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
+	ID         string
+	Nickname   string
+	Email      string
+	PictureUrl string
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
 }

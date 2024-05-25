@@ -55,12 +55,34 @@ func (apiCfg *apiConfig)getAuthCallbackFunction(w http.ResponseWriter, r *http.R
 	// 	user.AccessToken, user.AccessTokenSecret, user.RefreshToken, user.ExpiresAt, user.RawData)
 	_, err = apiCfg.DB.GetUserByID(r.Context(), user.UserID)
 
+	//defer http.Redirect(w, r, "http://localhost:5173/", 200)
+
 	if err != nil{
 		apiCfg.handlerCreateGoogleUser(w, r, user)
 		return
 	}
 
-	//HERE SEND THE TOKEN TO FRONT END; SEE HANDLER USER FOR DETAILS
+	// godotenv.Load()
+
+	// key := os.Getenv("SECRET")
+
+	// if key == ""{
+	// 	log.Fatal("SECRET variable not found in environment")
+	// }
+
+	// cipherID, err := auth.Encrypt([]byte(key), []byte(user.UserID))
+
+	// if err != nil{
+	// 	respondWithError(w, 400, fmt.Sprintf("Error encrypting ID: %v", err))
+	// 	return
+	// }
+
+	// fmt.Printf("ID: %v", string(cipherID[:]))
+
+
+	token := "Token " + user.UserID
+
+	w.Header().Add("Authorization", token)
 
 }
 

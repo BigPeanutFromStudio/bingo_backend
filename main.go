@@ -22,6 +22,7 @@ type apiConfig struct{
 
 //IMPORTANT: FIX IRREGULAR NAMING CONVENTION IN DATABASE
 //BOARDS TABLE, EVENTS IN JSON, ONE TO MANY
+//DON'T STORE THE REFRESH TOKEN
 
 func main() {
 
@@ -67,6 +68,7 @@ func main() {
 	//Handlers
 	v1Router.Post("/presets", apiCfg.middlewareAuth(apiCfg.handlerCreatePreset))
 	v1Router.Get("/presets", apiCfg.middlewareAuth(apiCfg.handlerGetPresets))
+	v1Router.Get("/presets/{presetid}", apiCfg.handlerGetPresetByID)
 
 	//v1Router.Post("/users", apiCfg.handlerCreateUser)
 	v1Router.Get("/users", apiCfg.middlewareAuth(apiCfg.handlerGetUser))

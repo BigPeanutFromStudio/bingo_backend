@@ -11,19 +11,18 @@ import (
 )
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users (id, nickname, email ,refresh_token, picture_url, created_at, updated_at)
-VALUES ($1, $2, $3, $4, $5, $6, $7)
-RETURNING id, nickname, email, refresh_token, picture_url, created_at, updated_at
+INSERT INTO users (id, nickname, email, picture_url, created_at, updated_at)
+VALUES ($1, $2, $3, $4, $5, $6)
+RETURNING id, nickname, email, picture_url, created_at, updated_at
 `
 
 type CreateUserParams struct {
-	ID           string
-	Nickname     string
-	Email        string
-	RefreshToken string
-	PictureUrl   string
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
+	ID         string
+	Nickname   string
+	Email      string
+	PictureUrl string
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
@@ -31,7 +30,6 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		arg.ID,
 		arg.Nickname,
 		arg.Email,
-		arg.RefreshToken,
 		arg.PictureUrl,
 		arg.CreatedAt,
 		arg.UpdatedAt,
@@ -41,7 +39,6 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.ID,
 		&i.Nickname,
 		&i.Email,
-		&i.RefreshToken,
 		&i.PictureUrl,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -50,7 +47,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, nickname, email, refresh_token, picture_url, created_at, updated_at FROM users WHERE id = $1
+SELECT id, nickname, email, picture_url, created_at, updated_at FROM users WHERE id = $1
 `
 
 func (q *Queries) GetUserByID(ctx context.Context, id string) (User, error) {
@@ -60,7 +57,6 @@ func (q *Queries) GetUserByID(ctx context.Context, id string) (User, error) {
 		&i.ID,
 		&i.Nickname,
 		&i.Email,
-		&i.RefreshToken,
 		&i.PictureUrl,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -71,7 +67,7 @@ func (q *Queries) GetUserByID(ctx context.Context, id string) (User, error) {
 const updateUser = `-- name: UpdateUser :one
 UPDATE users SET nickname = $1 
 WHERE id = $2
-RETURNING id, nickname, email, refresh_token, picture_url, created_at, updated_at
+RETURNING id, nickname, email, picture_url, created_at, updated_at
 `
 
 type UpdateUserParams struct {
@@ -86,7 +82,6 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 		&i.ID,
 		&i.Nickname,
 		&i.Email,
-		&i.RefreshToken,
 		&i.PictureUrl,
 		&i.CreatedAt,
 		&i.UpdatedAt,
