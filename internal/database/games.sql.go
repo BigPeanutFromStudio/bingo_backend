@@ -51,6 +51,41 @@ func (q *Queries) CreateGame(ctx context.Context, arg CreateGameParams) (Game, e
 	return i, err
 }
 
+const getAdminedGames = `-- name: GetAdminedGames :many
+SELECT id, name, end_time, created_at, updated_at, preset, admin_id FROM games WHERE admin_id = $1
+`
+
+func (q *Queries) GetAdminedGames(ctx context.Context, adminID string) ([]Game, error) {
+	rows, err := q.db.QueryContext(ctx, getAdminedGames, adminID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Game
+	for rows.Next() {
+		var i Game
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.EndTime,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Preset,
+			&i.AdminID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getGame = `-- name: GetGame :one
 SELECT id, name, end_time, created_at, updated_at, preset, admin_id FROM games WHERE id = $1
 `

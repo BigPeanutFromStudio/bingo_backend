@@ -22,7 +22,8 @@ type apiConfig struct{
 
 //IMPORTANT: FIX IRREGULAR NAMING CONVENTION IN DATABASE
 //BOARDS TABLE, EVENTS IN JSON, ONE TO MANY
-//DON'T STORE THE REFRESH TOKEN
+//Ummm nickname situation
+//GET GAMES NOT GAMES USERS
 
 func main() {
 
@@ -76,8 +77,10 @@ func main() {
 
 	v1Router.Post("/games", apiCfg.middlewareAuth(apiCfg.handlerCreateGame))
 	
-	v1Router.Post("/games/join/{gamesuesersID}", apiCfg.middlewareAuth(apiCfg.handlerCreateGamesUsers))
+	//v1Router.Post("/games/join/{gamesuesersID}", apiCfg.middlewareAuth(apiCfg.handlerCreateGamesUsers))
+	v1Router.Put("/games/join/{gameID}", apiCfg.middlewareAuth(apiCfg.handlerAddUsersToGame))
 	v1Router.Get("/games", apiCfg.middlewareAuth(apiCfg.handlerGetGamesUsers))
+	v1Router.Get("/games/admin", apiCfg.middlewareAuth(apiCfg.handlerGetAdminedGames))
 	v1Router.Delete("/games/{gamesuesersID}", apiCfg.middlewareAuth(apiCfg.handlerDeleteGamesUsers))
 
 	v1Router.Get("/auth/{provider}/callback", apiCfg.getAuthCallbackFunction)

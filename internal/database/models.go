@@ -11,6 +11,15 @@ import (
 	"github.com/google/uuid"
 )
 
+type Board struct {
+	ID        uuid.UUID
+	Events    json.RawMessage
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	GameID    uuid.UUID
+	OwnerID   string
+}
+
 type Game struct {
 	ID        uuid.UUID
 	Name      string

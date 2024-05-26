@@ -6,6 +6,9 @@ RETURNING *;
 -- name: GetUserByID :one
 SELECT * FROM users WHERE id = $1;
 
+-- name: GetUserByNickname :one
+SELECT * FROM users WHERE nickname = $1;
+
 -- name: UpdateUser :one
 UPDATE users SET nickname = $1 
 WHERE id = $2

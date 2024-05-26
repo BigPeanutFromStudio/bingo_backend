@@ -64,6 +64,24 @@ func (q *Queries) GetUserByID(ctx context.Context, id string) (User, error) {
 	return i, err
 }
 
+const getUserByNickname = `-- name: GetUserByNickname :one
+SELECT id, nickname, email, picture_url, created_at, updated_at FROM users WHERE nickname = $1
+`
+
+func (q *Queries) GetUserByNickname(ctx context.Context, nickname string) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserByNickname, nickname)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Nickname,
+		&i.Email,
+		&i.PictureUrl,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const updateUser = `-- name: UpdateUser :one
 UPDATE users SET nickname = $1 
 WHERE id = $2

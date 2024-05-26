@@ -46,3 +46,16 @@ func (apiCfg *apiConfig)handlerCreateGame(w http.ResponseWriter, r *http.Request
 
 	respondWithJSON(w, 200, game)
 }
+
+func (apiCfg *apiConfig)handlerGetAdminedGames(w http.ResponseWriter, r *http.Request, user database.User){
+
+	games, err := apiCfg.DB.GetAdminedGames(r.Context(), user.ID)
+
+	if err != nil{
+		respondWithError(w, 400, fmt.Sprintf("Error getting games: %v", err))
+		return
+	}
+
+	respondWithJSON(w, 200, games)
+
+}
