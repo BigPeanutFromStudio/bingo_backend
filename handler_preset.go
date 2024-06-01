@@ -93,12 +93,88 @@ func (apiCfg *apiConfig)handlerGetPresetByID(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	presets, err := apiCfg.DB.GetUserPresetByID(r.Context(), presetID)
+	preset, err := apiCfg.DB.GetUserPresetByID(r.Context(), presetID)
+
+	if err != nil{
+		respondWithError(w, 400, fmt.Sprintf("Error getting preset: %v", err))
+		return
+	}
+
+	respondWithJSON(w, 200, preset)
+}
+
+func (apiCfg *apiConfig)handlerEditPreset(w http.ResponseWriter, r *http.Request, user database.User){
+
+	presetIDstr := chi.URLParam(r, "presetid")
+
+	presetID, err := uuid.Parse(presetIDstr)
+
+	if err != nil{
+		respondWithError(w, 400, fmt.Sprintf("Error parsing UUID: %v", err))
+		return
+	}
+
+	type parameters struct{
+		Events []event `json:"events"`
+	}
+
+	decoder := json.NewDecoder(r.Body)
+
+	params := parameters{}
+
+	err = decoder.Decode(&params)
+	if err != nil{
+		respondWithError(w, 400, fmt.Sprintf("Error parsing JSON: %v", err))
+		return
+	}
+
+
+	preset, err := apiCfg.DB.GetUserPresetByID(r.Context(), presetID)
 
 	if err != nil{
 		respondWithError(w, 400, fmt.Sprintf("Error getting presets: %v", err))
 		return
 	}
 
-	respondWithJSON(w, 200, presets)
+	if preset.OwnerID != user.ID{
+		respondWithError(w, 400, "User not authorized")
+		return
+	}
+
+	presetEventsJson := preset.Events
+	var presetEvents []event
+
+	err = json.Unmarshal(presetEventsJson, &presetEvents)
+
+	if err != nil{
+		respondWithError(w, 400, fmt.Sprintf("Error parsing JSON: %v", err))
+		return
+	}
+
+	for i, event := range(presetEvents){
+		for _, eventToEdit := range(params.Events){
+			if eventToEdit.ID == event.ID{
+				presetEvents[i] = eventToEdit
+			}
+		}
+	}
+
+	eventsJson, err := json.Marshal(presetEvents)
+
+	if err != nil{
+		respondWithError(w, 400, fmt.Sprintf("Error parsing JSON: %v", err))
+		return
+	}
+
+	newPreset, err := apiCfg.DB.UpdatePresetEvents(r.Context(), database.UpdatePresetEventsParams{
+		Events: eventsJson,
+		ID: presetID,
+	})
+
+	if err != nil{
+		respondWithError(w, 400, fmt.Sprintf("Error updating preset: %v", err))
+		return
+	}
+
+	respondWithJSON(w, 200, newPreset)
 }

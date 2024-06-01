@@ -69,6 +69,7 @@ func main() {
 	v1Router.Post("/presets", apiCfg.middlewareAuth(apiCfg.handlerCreatePreset))
 	v1Router.Get("/presets", apiCfg.middlewareAuth(apiCfg.handlerGetPresets))
 	v1Router.Get("/presets/{presetid}", apiCfg.handlerGetPresetByID)
+	v1Router.Put("/presets/{presetid}", apiCfg.middlewareAuth(apiCfg.handlerEditPreset))
 
 	//v1Router.Post("/users", apiCfg.handlerCreateUser)
 	v1Router.Get("/users", apiCfg.middlewareAuth(apiCfg.handlerGetUser))
