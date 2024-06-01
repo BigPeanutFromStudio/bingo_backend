@@ -37,16 +37,9 @@ func (apiCfg *apiConfig)handlerSetGoogleUserNickname(w http.ResponseWriter, r *h
 		return
 	}
 
-	nickID, err := randomHex(5)
-
-	if err != nil{
-		respondWithError(w, 400, fmt.Sprintf("Error generating id: %v", err))
-		return
-	}
-
 	updatedUser, err := apiCfg.DB.UpdateUser(r.Context(), database.UpdateUserParams{
 		ID: user.ID,
-		Nickname: params.Nickname + "#" + nickID,
+		Nickname: params.Nickname,
 	})
 
 	if err != nil{
@@ -60,11 +53,17 @@ func (apiCfg *apiConfig)handlerSetGoogleUserNickname(w http.ResponseWriter, r *h
 // How does it work when redirecting
 func (apiCfg *apiConfig)handlerCreateGoogleUser(w http.ResponseWriter, r *http.Request, userData goth.User){
 
-	// GET USER MAYBE?
+	nickID, err := randomHex(5)
+
+	if err != nil{
+		respondWithError(w, 400, fmt.Sprintf("Error generating id: %v", err))
+		return
+	}
 
 	user, err := apiCfg.DB.CreateUser(r.Context(), database.CreateUserParams{
 		ID: userData.UserID,
 		Nickname: "Temporarily not working LMAO",
+		PublicID: nickID,
 		Email: userData.Email,
 		PictureUrl: userData.AvatarURL,
 		CreatedAt: time.Now().UTC(),
@@ -144,4 +143,15 @@ func (apiCfg *apiConfig)handlerGetUser(w http.ResponseWriter, r *http.Request, u
 	
 
 	respondWithJSON(w, 200, user)
+}
+func (apiCfg *apiConfig)handlerGetAllUsers(w http.ResponseWriter, r *http.Request) {
+	
+	users, err := apiCfg.DB.GetAllUsers(r.Context())
+
+	if err != nil {
+		respondWithError(w, 400, fmt.Sprintf("Error getting users: %v", err))
+		return
+	}
+
+	respondWithJSON(w, 200, users)
 }

@@ -11,14 +11,15 @@ import (
 )
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users (id, nickname, email, picture_url, created_at, updated_at)
-VALUES ($1, $2, $3, $4, $5, $6)
-RETURNING id, nickname, email, picture_url, created_at, updated_at
+INSERT INTO users (id, nickname, public_id, email, picture_url, created_at, updated_at)
+VALUES ($1, $2, $3, $4, $5, $6, $7)
+RETURNING id, nickname, public_id, email, picture_url, created_at, updated_at
 `
 
 type CreateUserParams struct {
 	ID         string
 	Nickname   string
+	PublicID   string
 	Email      string
 	PictureUrl string
 	CreatedAt  time.Time
@@ -29,6 +30,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 	row := q.db.QueryRowContext(ctx, createUser,
 		arg.ID,
 		arg.Nickname,
+		arg.PublicID,
 		arg.Email,
 		arg.PictureUrl,
 		arg.CreatedAt,
@@ -38,6 +40,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 	err := row.Scan(
 		&i.ID,
 		&i.Nickname,
+		&i.PublicID,
 		&i.Email,
 		&i.PictureUrl,
 		&i.CreatedAt,
@@ -46,8 +49,41 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 	return i, err
 }
 
+const getAllUsers = `-- name: GetAllUsers :many
+SELECT nickname, public_id, picture_url FROM users
+`
+
+type GetAllUsersRow struct {
+	Nickname   string
+	PublicID   string
+	PictureUrl string
+}
+
+func (q *Queries) GetAllUsers(ctx context.Context) ([]GetAllUsersRow, error) {
+	rows, err := q.db.QueryContext(ctx, getAllUsers)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAllUsersRow
+	for rows.Next() {
+		var i GetAllUsersRow
+		if err := rows.Scan(&i.Nickname, &i.PublicID, &i.PictureUrl); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, nickname, email, picture_url, created_at, updated_at FROM users WHERE id = $1
+SELECT id, nickname, public_id, email, picture_url, created_at, updated_at FROM users WHERE id = $1
 `
 
 func (q *Queries) GetUserByID(ctx context.Context, id string) (User, error) {
@@ -56,6 +92,7 @@ func (q *Queries) GetUserByID(ctx context.Context, id string) (User, error) {
 	err := row.Scan(
 		&i.ID,
 		&i.Nickname,
+		&i.PublicID,
 		&i.Email,
 		&i.PictureUrl,
 		&i.CreatedAt,
@@ -64,16 +101,17 @@ func (q *Queries) GetUserByID(ctx context.Context, id string) (User, error) {
 	return i, err
 }
 
-const getUserByNickname = `-- name: GetUserByNickname :one
-SELECT id, nickname, email, picture_url, created_at, updated_at FROM users WHERE nickname = $1
+const getUserByPublicID = `-- name: GetUserByPublicID :one
+SELECT id, nickname, public_id, email, picture_url, created_at, updated_at FROM users WHERE public_id = $1
 `
 
-func (q *Queries) GetUserByNickname(ctx context.Context, nickname string) (User, error) {
-	row := q.db.QueryRowContext(ctx, getUserByNickname, nickname)
+func (q *Queries) GetUserByPublicID(ctx context.Context, publicID string) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserByPublicID, publicID)
 	var i User
 	err := row.Scan(
 		&i.ID,
 		&i.Nickname,
+		&i.PublicID,
 		&i.Email,
 		&i.PictureUrl,
 		&i.CreatedAt,
@@ -85,7 +123,7 @@ func (q *Queries) GetUserByNickname(ctx context.Context, nickname string) (User,
 const updateUser = `-- name: UpdateUser :one
 UPDATE users SET nickname = $1 
 WHERE id = $2
-RETURNING id, nickname, email, picture_url, created_at, updated_at
+RETURNING id, nickname, public_id, email, picture_url, created_at, updated_at
 `
 
 type UpdateUserParams struct {
@@ -99,6 +137,7 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 	err := row.Scan(
 		&i.ID,
 		&i.Nickname,
+		&i.PublicID,
 		&i.Email,
 		&i.PictureUrl,
 		&i.CreatedAt,

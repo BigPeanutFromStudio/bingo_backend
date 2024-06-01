@@ -12,9 +12,13 @@ import (
 )
 
 type event struct{
+	ID string
 	Name string
 	Description string
 }
+
+
+//This repeats, maybe create utils
 
 func (apiCfg *apiConfig)handlerCreatePreset(w http.ResponseWriter, r *http.Request, user database.User){
 	type parameters struct{
@@ -32,12 +36,23 @@ func (apiCfg *apiConfig)handlerCreatePreset(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
+	for i, _ := range(params.Events){
+		eventID, err := randomHex(5)
+
+		if err != nil{
+			respondWithError(w, 400, fmt.Sprintf("Error generating id: %v", err))
+			return
+		}
+		params.Events[i].ID = eventID
+	}
+
 	Events, err := json.Marshal(params.Events)
 
 	if err != nil{
 		respondWithError(w, 400, fmt.Sprintf("Error parsing JSON: %v", err))
 		return
 	}
+
 
 	preset, err := apiCfg.DB.CreatePreset(r.Context(), database.CreatePresetParams{
 		ID: uuid.New(),
@@ -72,6 +87,11 @@ func (apiCfg *apiConfig)handlerGetPresetByID(w http.ResponseWriter, r *http.Requ
 	presetIDstr := chi.URLParam(r, "presetid")
 
 	presetID, err := uuid.Parse(presetIDstr)
+
+	if err != nil{
+		respondWithError(w, 400, fmt.Sprintf("Error parsing UUID: %v", err))
+		return
+	}
 
 	presets, err := apiCfg.DB.GetUserPresetByID(r.Context(), presetID)
 

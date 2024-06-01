@@ -56,7 +56,17 @@ func (apiCfg *apiConfig)handlerGetGamesUsers(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	respondWithJSON(w, 200, gameusers)
+	var games []database.Game
+	for _, gameuser := range(gameusers){
+		game, err := apiCfg.DB.GetGame(r.Context(), gameuser.GameID)
+		if err != nil{
+			respondWithError(w, 400, fmt.Sprintf("Error getting games: %v", err))
+			return
+		}	
+		games = append(games, game)
+	}
+
+	respondWithJSON(w, 200, games)
 }
 
 func (apiCfg *apiConfig)handlerDeleteGamesUsers(w http.ResponseWriter, r *http.Request, user database.User) {
@@ -95,7 +105,7 @@ func (apiCfg *apiConfig)handlerAddUsersToGame(w http.ResponseWriter, r *http.Req
 	}
 
 	type parameters struct{
-		UserID []string `json:"user_nicknames"`
+		UserID []string `json:"user_ids"`
 	}
 
 	decoder := json.NewDecoder(r.Body)
@@ -122,9 +132,9 @@ func (apiCfg *apiConfig)handlerAddUsersToGame(w http.ResponseWriter, r *http.Req
 	}
 
 	var gameusers []database.GamesUser
-	for _, userNickname := range(params.UserID){
+	for _, userID := range(params.UserID){
 
-		userToAdd, err := apiCfg.DB.GetUserByNickname(r.Context(), userNickname)
+		userToAdd, err := apiCfg.DB.GetUserByPublicID(r.Context(), userID)
 
 		if err != nil{
 			respondWithError(w, 400, fmt.Sprintf("Error getting user: %v", err))

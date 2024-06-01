@@ -50,6 +50,7 @@ type Preset struct {
 type User struct {
 	ID         string
 	Nickname   string
+	PublicID   string
 	Email      string
 	PictureUrl string
 	CreatedAt  time.Time

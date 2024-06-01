@@ -100,3 +100,28 @@ func (q *Queries) GetUserPresets(ctx context.Context, ownerID string) ([]Preset,
 	}
 	return items, nil
 }
+
+const updatePresetEvents = `-- name: UpdatePresetEvents :one
+UPDATE presets SET events = $1
+WHERE id = $2
+RETURNING id, name, events, created_at, updated_at, owner_id
+`
+
+type UpdatePresetEventsParams struct {
+	Events json.RawMessage
+	ID     uuid.UUID
+}
+
+func (q *Queries) UpdatePresetEvents(ctx context.Context, arg UpdatePresetEventsParams) (Preset, error) {
+	row := q.db.QueryRowContext(ctx, updatePresetEvents, arg.Events, arg.ID)
+	var i Preset
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Events,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.OwnerID,
+	)
+	return i, err
+}

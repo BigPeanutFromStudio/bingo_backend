@@ -8,3 +8,8 @@ SELECT * FROM presets WHERE owner_id = $1;
 
 -- name: GetUserPresetByID :one
 SELECT * FROM presets WHERE id = $1;
+
+-- name: UpdatePresetEvents :one
+UPDATE presets SET events = $1
+WHERE id = $2
+RETURNING *;

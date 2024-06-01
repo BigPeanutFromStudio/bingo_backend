@@ -22,8 +22,7 @@ type apiConfig struct{
 
 //IMPORTANT: FIX IRREGULAR NAMING CONVENTION IN DATABASE
 //BOARDS TABLE, EVENTS IN JSON, ONE TO MANY
-//Ummm nickname situation
-//GET GAMES NOT GAMES USERS
+//MAYBE DON'T STORE THE GOOGLE ID??
 
 func main() {
 
@@ -73,6 +72,7 @@ func main() {
 
 	//v1Router.Post("/users", apiCfg.handlerCreateUser)
 	v1Router.Get("/users", apiCfg.middlewareAuth(apiCfg.handlerGetUser))
+	v1Router.Get("/users/list", apiCfg.handlerGetAllUsers) //temporary
 	v1Router.Put("/users", apiCfg.middlewareAuth(apiCfg.handlerSetGoogleUserNickname))
 
 	v1Router.Post("/games", apiCfg.middlewareAuth(apiCfg.handlerCreateGame))
