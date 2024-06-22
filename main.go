@@ -76,10 +76,10 @@ func main() {
 	v1Router.Get("/users/list", apiCfg.handlerGetAllUsers) //temporary
 	v1Router.Put("/users", apiCfg.middlewareAuth(apiCfg.handlerSetGoogleUserNickname))
 
-	v1Router.Post("/games", apiCfg.middlewareAuth(apiCfg.handlerCreateGame))
+	v1Router.Post("/games", apiCfg.middlewareAuth(apiCfg.handlerCreateGame)) //REWORK
 	
 	//v1Router.Post("/games/join/{gamesuesersID}", apiCfg.middlewareAuth(apiCfg.handlerCreateGamesUsers))
-	v1Router.Put("/games/join/{gameID}", apiCfg.middlewareAuth(apiCfg.handlerAddUsersToGame))
+	v1Router.Put("/games/join/{gameID}", apiCfg.middlewareAuth(apiCfg.handlerAddUsersToGame)) //REWORK
 	v1Router.Get("/games", apiCfg.middlewareAuth(apiCfg.handlerGetGamesUsers))
 	v1Router.Get("/games/admin", apiCfg.middlewareAuth(apiCfg.handlerGetAdminedGames))
 	v1Router.Delete("/games/{gamesuesersID}", apiCfg.middlewareAuth(apiCfg.handlerDeleteGamesUsers))
