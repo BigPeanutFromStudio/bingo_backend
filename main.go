@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -12,6 +13,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/joho/godotenv"
+	"github.com/olahol/melody"
 
 	_ "github.com/lib/pq"
 )
@@ -38,6 +40,8 @@ func main() {
 	if dbURL == ""{
 		log.Fatal("DB_URL variable not found in environment")
 	}
+
+	m := melody.New()
 
 	conn, err := sql.Open("postgres", dbURL)
 
@@ -87,6 +91,21 @@ func main() {
 	v1Router.Get("/auth/{provider}/callback", apiCfg.getAuthCallbackFunction)
 	v1Router.Get("/logout", logoutHandler)
 	v1Router.Get("/auth/{provider}", beginAuthHandler)
+
+	v1Router.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		m.HandleRequest(w, r)
+	})
+
+
+	//figure out how to respond only to the messenger
+	m.HandleMessage(func(s *melody.Session, msg []byte) {
+		if(string(msg) == "lol"){
+			m.Broadcast([]byte("Not funny"))
+		}else{
+			m.Broadcast(msg)
+		}
+		fmt.Printf("Handled message %v", string(msg))
+	})
 
 
 	router.Mount("/v1", v1Router)
