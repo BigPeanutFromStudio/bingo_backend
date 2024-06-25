@@ -5,3 +5,6 @@ RETURNING *;
 
 -- name: GetGame :one
 SELECT * FROM games WHERE id = $1;
+
+-- name: GetAdminedGames :many
+SELECT * FROM games WHERE admin_id = $1;

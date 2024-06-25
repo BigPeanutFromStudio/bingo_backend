@@ -11,6 +11,15 @@ import (
 	"github.com/google/uuid"
 )
 
+type Board struct {
+	ID        uuid.UUID
+	Events    json.RawMessage
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	GameID    uuid.UUID
+	OwnerID   string
+}
+
 type Game struct {
 	ID        uuid.UUID
 	Name      string
@@ -18,13 +27,13 @@ type Game struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	Preset    uuid.UUID
-	AdminID   uuid.UUID
+	AdminID   string
 }
 
 type GamesUser struct {
 	ID        uuid.UUID
 	GameID    uuid.UUID
-	UserID    uuid.UUID
+	UserID    string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
@@ -35,13 +44,15 @@ type Preset struct {
 	Events    json.RawMessage
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	OwnerID   uuid.UUID
+	OwnerID   string
 }
 
 type User struct {
-	ID        uuid.UUID
-	Nickname  string
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	Token     string
+	ID         string
+	Nickname   string
+	PublicID   string
+	Email      string
+	PictureUrl string
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
 }

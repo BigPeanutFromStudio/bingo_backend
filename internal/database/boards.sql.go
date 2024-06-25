@@ -13,61 +13,61 @@ import (
 	"github.com/google/uuid"
 )
 
-const createPreset = `-- name: CreatePreset :one
-INSERT INTO presets (id, name, events, created_at, updated_at, owner_id)
+const createBoard = `-- name: CreateBoard :one
+INSERT INTO boards (id, events, created_at, updated_at, game_id, owner_id)
 VALUES ($1, $2, $3, $4, $5, $6)
-RETURNING id, name, events, created_at, updated_at, owner_id
+RETURNING id, events, created_at, updated_at, game_id, owner_id
 `
 
-type CreatePresetParams struct {
+type CreateBoardParams struct {
 	ID        uuid.UUID
-	Name      string
 	Events    json.RawMessage
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	OwnerID   uuid.UUID
+	GameID    uuid.UUID
+	OwnerID   string
 }
 
-func (q *Queries) CreatePreset(ctx context.Context, arg CreatePresetParams) (Preset, error) {
-	row := q.db.QueryRowContext(ctx, createPreset,
+func (q *Queries) CreateBoard(ctx context.Context, arg CreateBoardParams) (Board, error) {
+	row := q.db.QueryRowContext(ctx, createBoard,
 		arg.ID,
-		arg.Name,
 		arg.Events,
 		arg.CreatedAt,
 		arg.UpdatedAt,
+		arg.GameID,
 		arg.OwnerID,
 	)
-	var i Preset
+	var i Board
 	err := row.Scan(
 		&i.ID,
-		&i.Name,
 		&i.Events,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.GameID,
 		&i.OwnerID,
 	)
 	return i, err
 }
 
-const getUserPresets = `-- name: GetUserPresets :many
-SELECT id, name, events, created_at, updated_at, owner_id FROM presets WHERE owner_id = $1
+const getUserBoards = `-- name: GetUserBoards :many
+SELECT id, events, created_at, updated_at, game_id, owner_id FROM boards WHERE owner_id = $1
 `
 
-func (q *Queries) GetUserPresets(ctx context.Context, ownerID uuid.UUID) ([]Preset, error) {
-	rows, err := q.db.QueryContext(ctx, getUserPresets, ownerID)
+func (q *Queries) GetUserBoards(ctx context.Context, ownerID string) ([]Board, error) {
+	rows, err := q.db.QueryContext(ctx, getUserBoards, ownerID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Preset
+	var items []Board
 	for rows.Next() {
-		var i Preset
+		var i Board
 		if err := rows.Scan(
 			&i.ID,
-			&i.Name,
 			&i.Events,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.GameID,
 			&i.OwnerID,
 		); err != nil {
 			return nil, err

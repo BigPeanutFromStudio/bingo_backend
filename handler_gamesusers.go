@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -55,7 +56,17 @@ func (apiCfg *apiConfig)handlerGetGamesUsers(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	respondWithJSON(w, 200, gameusers)
+	var games []database.Game
+	for _, gameuser := range(gameusers){
+		game, err := apiCfg.DB.GetGame(r.Context(), gameuser.GameID)
+		if err != nil{
+			respondWithError(w, 400, fmt.Sprintf("Error getting games: %v", err))
+			return
+		}	
+		games = append(games, game)
+	}
+
+	respondWithJSON(w, 200, games)
 }
 
 func (apiCfg *apiConfig)handlerDeleteGamesUsers(w http.ResponseWriter, r *http.Request, user database.User) {
@@ -81,3 +92,73 @@ func (apiCfg *apiConfig)handlerDeleteGamesUsers(w http.ResponseWriter, r *http.R
 
 	respondWithJSON(w, 200, struct{}{})
 }
+
+func (apiCfg *apiConfig)handlerAddUsersToGame(w http.ResponseWriter, r *http.Request, user database.User) {
+	
+	gameIDstr := chi.URLParam(r, "gameID")
+
+	gameID, err := uuid.Parse(gameIDstr)
+
+	if err != nil{
+		respondWithError(w, 400, fmt.Sprintf("Error parsing UUID: %v", err))
+		return
+	}
+
+	type parameters struct{
+		UserID []string `json:"user_ids"`
+	}
+
+	decoder := json.NewDecoder(r.Body)
+
+	params := parameters{}
+
+	err = decoder.Decode(&params)
+
+	if err != nil{
+		respondWithError(w, 400, fmt.Sprintf("Error parsing JSON: %v", err))
+		return
+	}
+
+	game, err := apiCfg.DB.GetGame(r.Context(), gameID)
+
+	if err != nil{
+		respondWithError(w, 400, fmt.Sprintf("Error getting game: %v", err))
+		return
+	}
+
+	if game.AdminID != user.ID{
+		respondWithError(w, 400, "User is not an admin of the game")
+		return
+	}
+
+	var gameusers []database.GamesUser
+	for _, userID := range(params.UserID){
+
+		userToAdd, err := apiCfg.DB.GetUserByPublicID(r.Context(), userID)
+
+		if err != nil{
+			respondWithError(w, 400, fmt.Sprintf("Error getting user: %v", err))
+			return
+		}
+
+		gameuser, err := apiCfg.DB.CreateGameUser(r.Context(), database.CreateGameUserParams{
+			ID: uuid.New(),
+			UserID: userToAdd.ID,
+			GameID: game.ID,
+			CreatedAt: time.Now().UTC(),
+			UpdatedAt: time.Now().UTC(),
+		})
+
+		if err != nil{
+			respondWithError(w, 400, fmt.Sprintf("Error creating gameuser: %v", err))
+			return
+		}
+		
+		gameusers = append(gameusers, gameuser)
+	}
+
+
+	respondWithJSON(w, 200, gameusers)
+}
+
+

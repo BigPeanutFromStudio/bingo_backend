@@ -14,28 +14,32 @@ import (
 type authedHandler func(http.ResponseWriter, *http.Request, database.User)
 
 
+// https://www.googleapis.com/oauth2/v3/userinfo?access_token={access_token} 
+// use this to get id and get user in database
+
 func (apiCfg *apiConfig) middlewareAuth(handler authedHandler) http.HandlerFunc{
 	return func(w http.ResponseWriter, r *http.Request){
-		token, err := auth.GetToken(r.Header)
+		id, err := auth.GetID(r.Header)
 
 		if err != nil {
 			respondWithError(w, 400, fmt.Sprintf("Auth error: %v", err))
 			return
 		}
 
-		user, err := apiCfg.DB.GetUserByToken(r.Context(), token)
+		user, err := apiCfg.DB.GetUserByID(r.Context(), id)
 
+		
 		if err != nil {
 			respondWithError(w, 400, fmt.Sprintf("Error getting user: %v", err))
 			return
 		}
 
-	handler(w, r, user)
+		handler(w, r, user)
 	}
 }
 
 //idk if this should go here
-func getAuthCallbackFunction(w http.ResponseWriter, r *http.Request){
+func (apiCfg *apiConfig)getAuthCallbackFunction(w http.ResponseWriter, r *http.Request){
 
 	provider := chi.URLParam(r, "provider")
 
@@ -47,9 +51,38 @@ func getAuthCallbackFunction(w http.ResponseWriter, r *http.Request){
 		return
 	}
 
-	fmt.Println(user.UserID)
+	// fmt.Printf("AccessToken: %s\nAccessTokenSecret: %s\nRefreshToken: %s\nExpiresAt: %s\nRawData: %s\n",
+	// 	user.AccessToken, user.AccessTokenSecret, user.RefreshToken, user.ExpiresAt, user.RawData)
+	_, err = apiCfg.DB.GetUserByID(r.Context(), user.UserID)
 
-	http.Redirect(w, r, "http://localhost:5173/", 301)
+	//defer http.Redirect(w, r, "http://localhost:5173/", 200)
+
+	if err != nil{
+		apiCfg.handlerCreateGoogleUser(w, r, user)
+		return
+	}
+
+	// godotenv.Load()
+
+	// key := os.Getenv("SECRET")
+
+	// if key == ""{
+	// 	log.Fatal("SECRET variable not found in environment")
+	// }
+
+	// cipherID, err := auth.Encrypt([]byte(key), []byte(user.UserID))
+
+	// if err != nil{
+	// 	respondWithError(w, 400, fmt.Sprintf("Error encrypting ID: %v", err))
+	// 	return
+	// }
+
+	// fmt.Printf("ID: %v", string(cipherID[:]))
+
+
+	token := "Token " + user.UserID
+
+	w.Header().Add("Authorization", token)
 
 }
 

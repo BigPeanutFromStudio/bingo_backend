@@ -7,7 +7,7 @@ CREATE TABLE games (
   created_at TIMESTAMP NOT NULL,
   updated_at TIMESTAMP NOT NULL,
   preset UUID NOT NULL REFERENCES presets(id) ON DELETE CASCADE,
-  admin_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE
+  admin_id VARCHAR(21) NOT NULL REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- +goose Down
